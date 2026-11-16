@@ -1,140 +1,199 @@
-@model PagedList.IPagedList<_25DH110979_quangminh.Models.Order>
-@using PagedList.Mvc
+@model List<_25DH110979_quangminh.Models.Order>
 @{
-    ViewBag.Title = "Lịch sử mua hàng";
+    ViewBag.Title = "Đơn hàng của tôi";
     Layout = "~/Views/Shared/_CustomerLayout.cshtml";
-    var statusList = new[] { "Chờ xử lý", "Chờ thanh toán", "Đang xử lý", "Đang vận chuyển", "Đã giao", "Đã hủy" };
+    var statusTabs = new[] { "Chờ thanh toán", "Đang xử lý", "Đang vận chuyển", "Đã giao", "Đã hủy" };
+    string currentStatus = ViewBag.CurrentStatus as string;
+    bool isAllTab = string.IsNullOrEmpty(currentStatus) || currentStatus == "Tất cả đơn";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h3 class="fw-bold mb-0"><i class="fas fa-history text-primary"></i> Lịch sử mua hàng</h3>
-    <a href="@Url.Action("Index","Home")" class="btn btn-outline-primary btn-sm"><i class="fas fa-shopping-bag"></i> Tiếp tục mua sắm</a>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="fw-bold mb-0"><i class="fas fa-box text-primary"></i> Đơn hàng của tôi</h3>
+    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-primary btn-sm"><i class="fas fa-home"></i> Trang chủ</a>
 </div>
 
 @if (TempData["Success"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show">
-        @TempData["Success"]
-    </div>
+    <div class="alert alert-success alert-dismissible fade show">@TempData["Success"]</div>
 }
 @if (TempData["Warning"] != null)
 {
-    <div class="alert alert-warning alert-dismissible fade show">
-        @TempData["Warning"]
-    </div>
+    <div class="alert alert-warning alert-dismissible fade show">@TempData["Warning"]</div>
 }
 
-<!-- Tìm kiếm và Tabs trạng thái -->
+<!-- Thanh tìm kiếm & Các Tab trạng thái -->
 <div class="card shadow-sm mb-4">
     <div class="card-body">
-        <form method="get" action="@Url.Action("MyOrder", "Order")" class="row g-2 mb-3">
-            <input type="hidden" name="status" value="@ViewBag.CurrentStatus" />
-            <div class="col-md-9">
-                <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control" placeholder="Tìm theo mã đơn hàng hoặc tên sản phẩm..." />
-            </div>
-            <div class="col-md-3 d-grid">
-                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Tìm kiếm</button>
-            </div>
-        </form>
-
-        <!-- Status Tabs -->
-        <ul class="nav nav-pills flex-column flex-sm-row">
+        <ul class="nav nav-tabs mb-3">
             <li class="nav-item">
-                <a class="nav-link @(string.IsNullOrEmpty(ViewBag.CurrentStatus) ? "active" : "")" 
-                   href="@Url.Action("MyOrder", "Order", new { searchTerm = ViewBag.SearchTerm })">Tất cả</a>
+                <a class="nav-link @(isAllTab ? "active fw-bold" : "")"
+                   href="@Url.Action("MyOrder", "Order", new { searchTerm = ViewBag.SearchTerm })">Tất cả đơn</a>
             </li>
-            @foreach (var s in statusList)
+            @foreach (var tab in statusTabs)
             {
                 <li class="nav-item">
-                    <a class="nav-link @(ViewBag.CurrentStatus == s ? "active" : "")" 
-                       href="@Url.Action("MyOrder", "Order", new { status = s, searchTerm = ViewBag.SearchTerm })">@s</a>
+                    <a class="nav-link @(currentStatus == tab ? "active fw-bold" : "")"
+                       href="@Url.Action("MyOrder", "Order", new { status = tab, searchTerm = ViewBag.SearchTerm })">@tab</a>
                 </li>
             }
         </ul>
+
+        <form method="get" action="@Url.Action("MyOrder", "Order")" class="row g-2">
+            <input type="hidden" name="status" value="@currentStatus" />
+            <div class="col-md-9">
+                <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control"
+                       placeholder="Tìm đơn hàng theo Mã đơn hàng hoặc Tên sản phẩm..." />
+            </div>
+            <div class="col-md-3 d-grid">
+                <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Tìm đơn hàng</button>
+            </div>
+        </form>
     </div>
 </div>
 
 @if (Model == null || !Model.Any())
 {
-    <div class="alert alert-info text-center py-4">
-        <i class="fas fa-box-open fa-2x mb-2 text-muted"></i>
-        <p class="mb-0">Bạn chưa có đơn hàng nào trong mục này.</p>
+    <div class="alert alert-warning text-center py-5 shadow-sm">
+        <i class="fas fa-shopping-basket fa-3x mb-3 text-warning"></i>
+        <h5 class="fw-bold text-uppercase mb-3">BẠN CHƯA CÓ ĐƠN HÀNG NÀO. HÃY ĐẶT ĐƠN NGAY.</h5>
+        <a href="@Url.Action("Index", "Home")" class="btn btn-primary px-4">
+            <i class="fas fa-home"></i> Về trang HOME mua sắm
+        </a>
     </div>
 }
 else
 {
-    foreach (var order in Model)
+    var groupsToRender = new List<Tuple<string, List<_25DH110979_quangminh.Models.Order>>>();
+
+    if (isAllTab)
     {
-        <div class="card shadow-sm mb-3">
-            <div class="card-header bg-light d-flex justify-content-between align-items-center">
-                <div>
-                    <span class="fw-bold text-primary">Đơn hàng #@order.OrderID</span>
-                    <span class="text-muted ms-2 small"><i class="far fa-clock"></i> @order.OrderDate.ToString("dd/MM/yyyy HH:mm")</span>
-                </div>
-                <div>
-                    @{
-                        string badgeClass = "bg-secondary";
-                        string st = order.PaymentStatus ?? "Chờ xử lý";
-                        if (st.Contains("Đã giao")) { badgeClass = "bg-success"; }
-                        else if (st.Contains("vận chuyển")) { badgeClass = "bg-primary"; }
-                        else if (st.Contains("xử lý")) { badgeClass = "bg-info text-dark"; }
-                        else if (st.Contains("Chờ")) { badgeClass = "bg-warning text-dark"; }
-                        else if (st.Contains("hủy")) { badgeClass = "bg-danger"; }
-                    }
-                    <span class="badge @badgeClass fs-6">@st</span>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="row align-items-center">
-                    <div class="col-md-7">
-                        @if (order.OrderDetail != null && order.OrderDetail.Any())
-                        {
-                            <ul class="list-unstyled mb-0">
-                                @foreach (var d in order.OrderDetail)
-                                {
-                                    <li class="mb-1">
-                                        <i class="fas fa-check-circle text-muted me-1"></i>
-                                        <strong>@(d.Product != null ? d.Product.ProductName : "Sản phẩm #" + d.ProductID)</strong>
-                                        <span class="text-muted">x @d.Quantity</span>
-                                        <span class="text-danger ms-2">(@d.UnitPrice.ToString("N0") đ)</span>
-                                    </li>
-                                }
-                            </ul>
-                        }
-                        <div class="text-muted small mt-2">
-                            <i class="fas fa-map-marker-alt"></i> @order.ShippingAddress
-                        </div>
-                    </div>
-                    <div class="col-md-5 text-md-end mt-3 mt-md-0">
-                        <div class="mb-2">
-                            <span class="text-muted">Tổng tiền: </span>
-                            <span class="fs-5 fw-bold text-danger">@order.TotalAmount.ToString("N0") đ</span>
-                        </div>
-                        <div class="btn-group">
-                            <a href="@Url.Action("OrderSuccess", "Order", new { orderId = order.OrderID })" class="btn btn-sm btn-outline-primary">
-                                <i class="fas fa-eye"></i> Chi tiết
-                            </a>
-                            <a href="@Url.Action("ReOrder", "Order", new { id = order.OrderID })" class="btn btn-sm btn-outline-success">
-                                <i class="fas fa-redo"></i> Mua lại
-                            </a>
-                            @if (order.PaymentStatus == "Chờ xử lý" || order.PaymentStatus == "Chờ thanh toán")
-                            {
-                                <a href="@Url.Action("CancelOrder", "Order", new { id = order.OrderID })" 
-                                   class="btn btn-sm btn-outline-danger" 
-                                   onclick="return confirm('Bạn có chắc chắn muốn hủy đơn hàng #@order.OrderID này? Hàng sẽ được hoàn về kho.');">
-                                    <i class="fas fa-times-circle"></i> Hủy đơn
-                                </a>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        foreach (var tab in statusTabs)
+        {
+            var listInGroup = tab == "Chờ thanh toán"
+                ? Model.Where(o => o.PaymentStatus == "Chờ thanh toán" || o.PaymentStatus == "Chờ xử lý").ToList()
+                : Model.Where(o => o.PaymentStatus == tab).ToList();
+
+            if (listInGroup.Any())
+            {
+                groupsToRender.Add(Tuple.Create(tab, listInGroup));
+            }
+        }
+        var otherOrders = Model.Where(o => !statusTabs.Contains(o.PaymentStatus) && o.PaymentStatus != "Chờ xử lý").ToList();
+        if (otherOrders.Any())
+        {
+            groupsToRender.Add(Tuple.Create("Khác", otherOrders));
+        }
+    }
+    else
+    {
+        groupsToRender.Add(Tuple.Create(currentStatus, Model));
     }
 
-    <!-- Phân trang -->
-    <div class="mt-4 d-flex justify-content-center">
-        @Html.PagedListPager(Model, page => Url.Action("MyOrder", "Order", new { page, status = ViewBag.CurrentStatus, searchTerm = ViewBag.SearchTerm }),
-            PagedListRenderOptions.ClassicPlusFirstAndLast)
-    </div>
+    int groupIndex = 0;
+    foreach (var grp in groupsToRender)
+    {
+        groupIndex++;
+        string groupTitle = grp.Item1;
+        var ordersInGroup = grp.Item2;
+        string groupDomId = "order-group-" + groupIndex;
+
+        <div class="mb-4" id="@groupDomId">
+            <div class="d-flex align-items-center mb-2">
+                <span class="badge bg-secondary fs-6 me-2">@groupTitle (@ordersInGroup.Count)</span>
+                <hr class="flex-grow-1 my-0" />
+            </div>
+
+            @for (int i = 0; i < ordersInGroup.Count; i++)
+            {
+                var order = ordersInGroup[i];
+                bool isHiddenInitially = i >= 2;
+
+                <div class="card shadow-sm mb-3 order-card-item @(isHiddenInitially ? "d-none extra-order" : "")">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-bold text-primary">Mã đơn #@order.OrderID</span>
+                            <span class="text-muted ms-2 small"><i class="far fa-clock"></i> @order.OrderDate.ToString("dd/MM/yyyy HH:mm")</span>
+                        </div>
+                        <span class="badge bg-info text-dark">@(order.PaymentStatus ?? "Chờ thanh toán")</span>
+                    </div>
+                    <div class="card-body">
+                        @if (order.OrderDetail != null && order.OrderDetail.Any())
+                        {
+                            foreach (var d in order.OrderDetail)
+                            {
+                                string imgSrc = (d.Product != null && !string.IsNullOrEmpty(d.Product.ProductImage))
+                                    ? (d.Product.ProductImage.StartsWith("~") || d.Product.ProductImage.StartsWith("/")
+                                        ? Url.Content(d.Product.ProductImage)
+                                        : Url.Content("~/Content/images/" + d.Product.ProductImage))
+                                    : Url.Content("~/Content/images/default.png");
+
+                                <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                                    <div class="d-flex align-items-center">
+                                        <img src="@imgSrc" alt="SP" class="rounded border me-3 bg-white p-1"
+                                             style="width:65px; height:65px; object-fit:contain;"
+                                             onerror="this.src='/Content/images/default.png'" />
+                                        <div>
+                                            <div class="fw-bold">@(d.Product != null ? d.Product.ProductName : "Sản phẩm #" + d.ProductID)</div>
+                                            <div class="text-muted small">Số lượng: x@d.Quantity | Đơn giá: @d.UnitPrice.ToString("N0") đ</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="fw-bold text-danger mb-1">@((d.Quantity * d.UnitPrice).ToString("N0")) đ</div>
+                                        <a href="@Url.Action("BuyAgainItem", "Order", new { productId = d.ProductID })" class="btn btn-sm btn-primary">
+                                            MUA LẠI
+                                        </a>
+                                        <a href="@Url.Action("ProductDetail", "Home", new { id = d.ProductID })" class="btn btn-sm btn-outline-secondary">
+                                            XEM CHI TIẾT
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        }
+
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <div class="text-muted small">
+                                <i class="fas fa-map-marker-alt"></i> Giao đến: @order.ShippingAddress
+                            </div>
+                            <div class="text-end">
+                                <span class="me-3">Tổng tiền: <strong class="fs-5 text-danger">@order.TotalAmount.ToString("N0") đ</strong></span>
+                                <a href="@Url.Action("OrderSuccess", "Order", new { orderId = order.OrderID })" class="btn btn-sm btn-outline-primary">
+                                    Xem đơn hàng
+                                </a>
+                                @if (order.PaymentStatus == "Chờ xử lý" || order.PaymentStatus == "Chờ thanh toán")
+                                {
+                                    <a href="@Url.Action("CancelOrder", "Order", new { id = order.OrderID })"
+                                       class="btn btn-sm btn-outline-danger"
+                                       onclick="return confirm('Bạn có chắc chắn muốn hủy đơn hàng #@order.OrderID này?');">
+                                        Hủy đơn
+                                    </a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+
+            @if (ordersInGroup.Count > 2)
+            {
+                <div class="text-center">
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-4"
+                            onclick="showMoreOrders('@groupDomId', this)">
+                        Xem thêm (@(ordersInGroup.Count - 2) đơn hàng khác)
+                    </button>
+                </div>
+            }
+        </div>
+    }
 }
+
+<script>
+    function showMoreOrders(groupId, btn) {
+        var container = document.getElementById(groupId);
+        if (!container) return;
+        var hiddenCards = container.querySelectorAll('.extra-order');
+        hiddenCards.forEach(function (card) {
+            card.classList.remove('d-none');
+        });
+        btn.style.display = 'none';
+    }
+</script>

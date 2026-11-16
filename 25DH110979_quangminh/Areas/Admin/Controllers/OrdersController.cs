@@ -13,8 +13,8 @@ namespace _25DH110979_quangminh.Areas.Admin.Controllers
     {
         private MyStoreEntities db = new MyStoreEntities();
 
-        // GET: Admin/Orders
-        public ActionResult Index(string searchTerm, string status, int? page)
+        // GET: Admin/Orders (Tìm theo Tên khách hàng, Trạng thái thanh toán, Ngày đặt hàng - Phân trang 15 đơn/trang)
+        public ActionResult Index(string searchTerm, string status, DateTime? orderDate, int? page)
         {
             var query = db.Order.Include(o => o.Customer).AsQueryable();
 
@@ -37,30 +37,45 @@ namespace _25DH110979_quangminh.Areas.Admin.Controllers
                 query = query.Where(o => o.PaymentStatus == status);
             }
 
-            int pageSize = 10;
+            if (orderDate.HasValue)
+            {
+                DateTime startDate = orderDate.Value.Date;
+                DateTime endDate = startDate.AddDays(1);
+                query = query.Where(o => o.OrderDate >= startDate && o.OrderDate < endDate);
+            }
+
+            int pageSize = 15;
             int pageNumber = page ?? 1;
 
             ViewBag.SearchTerm = searchTerm;
             ViewBag.CurrentStatus = status;
+            ViewBag.OrderDate = orderDate.HasValue ? orderDate.Value.ToString("yyyy-MM-dd") : "";
 
             return View(query.OrderByDescending(o => o.OrderID).ToPagedList(pageNumber, pageSize));
+        }
+
+        // GET: Admin/Orders/DetailedOrder/5
+        public ActionResult DetailedOrder(int? id)
+        {
+            if (id == null)
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+
+            Order order = db.Order.Include(o => o.Customer)
+                                 .Include(o => o.OrderDetail.Select(od => od.Product))
+                                 .FirstOrDefault(o => o.OrderID == id);
+            if (order == null)
+                return HttpNotFound();
+
+            if (ViewEngines.Engines.FindView(ControllerContext, "DetailedOrder", null).View != null)
+                return View("DetailedOrder", order);
+
+            return View("Details", order);
         }
 
         // GET: Admin/Orders/Details/5
         public ActionResult Details(int? id)
         {
-            if (id == null)
-            {
-                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
-            }
-            Order order = db.Order.Include(o => o.Customer)
-                                 .Include(o => o.OrderDetail.Select(od => od.Product))
-                                 .FirstOrDefault(o => o.OrderID == id);
-            if (order == null)
-            {
-                return HttpNotFound();
-            }
-            return View(order);
+            return DetailedOrder(id);
         }
 
         // POST: Admin/Orders/UpdateStatus
@@ -73,10 +88,8 @@ namespace _25DH110979_quangminh.Areas.Admin.Controllers
             {
                 string oldStatus = order.PaymentStatus ?? "Chờ xử lý";
 
-                // Xử lý tăng giảm số lượng tồn kho khi hủy đơn hoặc khôi phục đơn
                 if (oldStatus != "Đã hủy" && status == "Đã hủy")
                 {
-                    // Hoàn trả số lượng tồn kho khi hủy đơn
                     foreach (var detail in order.OrderDetail)
                     {
                         if (detail.Product != null)
@@ -88,7 +101,6 @@ namespace _25DH110979_quangminh.Areas.Admin.Controllers
                 }
                 else if (oldStatus == "Đã hủy" && status != "Đã hủy")
                 {
-                    // Trừ lại số lượng tồn kho nếu kích hoạt lại đơn đã hủy
                     foreach (var detail in order.OrderDetail)
                     {
                         if (detail.Product != null)
@@ -103,15 +115,12 @@ namespace _25DH110979_quangminh.Areas.Admin.Controllers
                 db.SaveChanges();
                 TempData["SuccessMessage"] = $"Cập nhật trạng thái đơn hàng #{orderId} thành '{status}' thành công!";
             }
-            return RedirectToAction("Details", new { id = orderId });
+            return RedirectToAction("DetailedOrder", new { id = orderId });
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
-            {
-                db.Dispose();
-            }
+            if (disposing) db.Dispose();
             base.Dispose(disposing);
         }
     }
