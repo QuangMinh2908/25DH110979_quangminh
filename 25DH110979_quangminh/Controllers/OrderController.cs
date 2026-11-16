@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Web.Mvc;
-using PagedList;
 using _25DH110979_quangminh.Models;
 using _25DH110979_quangminh.Models.ViewModel;
 
@@ -69,7 +68,6 @@ namespace _25DH110979_quangminh.Controllers
                 if (customer == null)
                     return RedirectToAction("Login", "Account");
 
-                // 1. Kiểm tra số lượng tồn kho trước khi tạo đơn hàng
                 foreach (var item in cart.Items)
                 {
                     var prod = db.Product.Find(item.ProductID);
@@ -80,7 +78,6 @@ namespace _25DH110979_quangminh.Controllers
                     }
                 }
 
-                // 2. Tạo đơn hàng mới
                 var order = new Order
                 {
                     CustomerID = customer.CustomerID,
@@ -94,7 +91,6 @@ namespace _25DH110979_quangminh.Controllers
                 db.Order.Add(order);
                 db.SaveChanges();
 
-                // 3. Tạo chi tiết đơn hàng và GIẢM số lượng tồn kho, TĂNG số lượng đã bán
                 foreach (var item in cart.Items)
                 {
                     var detail = new OrderDetail
@@ -107,7 +103,6 @@ namespace _25DH110979_quangminh.Controllers
                     };
                     db.OrderDetail.Add(detail);
 
-                    // Trừ tồn kho và tăng số lượng bán
                     var prod = db.Product.Find(item.ProductID);
                     if (prod != null)
                     {
@@ -117,7 +112,6 @@ namespace _25DH110979_quangminh.Controllers
                 }
                 db.SaveChanges();
 
-                // 4. Xóa giỏ hàng sau khi đặt thành công
                 GetCartService().ClearCart();
 
                 TempData["Success"] = "Đặt hàng thành công! Đơn hàng của bạn đang được xử lý.";
@@ -148,7 +142,7 @@ namespace _25DH110979_quangminh.Controllers
         }
 
         // GET: Order/MyOrder
-        public ActionResult MyOrder(string searchTerm, string status, int? page)
+        public ActionResult MyOrder(string searchTerm, string status)
         {
             string username = Session["Username"] as string;
             if (string.IsNullOrEmpty(username))
@@ -176,22 +170,39 @@ namespace _25DH110979_quangminh.Controllers
                 }
             }
 
-            if (!string.IsNullOrEmpty(status) && status != "Tất cả")
+            if (!string.IsNullOrEmpty(status) && status != "Tất cả đơn" && status != "Tất cả")
             {
-                query = query.Where(o => o.PaymentStatus == status);
+                if (status == "Chờ thanh toán")
+                {
+                    query = query.Where(o => o.PaymentStatus == "Chờ thanh toán" || o.PaymentStatus == "Chờ xử lý");
+                }
+                else
+                {
+                    query = query.Where(o => o.PaymentStatus == status);
+                }
             }
 
             ViewBag.CurrentStatus = status;
             ViewBag.SearchTerm = searchTerm;
 
-            int pageSize = 5;
-            int pageNumber = page ?? 1;
-            var orders = query.OrderByDescending(o => o.OrderID).ToPagedList(pageNumber, pageSize);
-
+            var orders = query.OrderByDescending(o => o.OrderDate).ThenByDescending(o => o.OrderID).Take(50).ToList();
             return View(orders);
         }
 
-        // POST/GET: Order/CancelOrder/5 (Hủy đơn hàng và HOÀN TRẢ số lượng tồn kho)
+        // GET: Order/BuyAgainItem?productId=5
+        public ActionResult BuyAgainItem(int productId)
+        {
+            var product = db.Product.Find(productId);
+            if (product != null)
+            {
+                GetCartService().AddToCart(product, 1);
+                TempData["Success"] = $"Đã thêm '{product.ProductName}' (số lượng: 1) vào giỏ hàng!";
+                return RedirectToAction("Index", "Cart");
+            }
+            return RedirectToAction("MyOrder");
+        }
+
+        // POST/GET: Order/CancelOrder/5
         [AcceptVerbs(HttpVerbs.Get | HttpVerbs.Post)]
         public ActionResult CancelOrder(int id)
         {
@@ -218,7 +229,6 @@ namespace _25DH110979_quangminh.Controllers
                 return RedirectToAction("MyOrder");
             }
 
-            // Hoàn lại số lượng tồn kho và giảm số lượng đã bán
             foreach (var detail in order.OrderDetail)
             {
                 if (detail.Product != null)
@@ -254,15 +264,11 @@ namespace _25DH110979_quangminh.Controllers
                 foreach (var item in order.OrderDetail)
                 {
                     if (item.Product != null)
-                    {
-                        cartService.AddToCart(item.Product, item.Quantity);
-                    }
+                        cartService.AddToCart(item.Product, 1);
                     else
-                    {
-                        cartService.AddToCart(item.ProductID, item.Quantity);
-                    }
+                        cartService.AddToCart(item.ProductID, 1);
                 }
-                TempData["Success"] = $"Đã thêm các sản phẩm từ đơn hàng #{id} vào giỏ hàng!";
+                TempData["Success"] = $"Đã thêm các sản phẩm từ đơn hàng #{id} (số lượng = 1) vào giỏ hàng!";
                 return RedirectToAction("Index", "Cart");
             }
 
