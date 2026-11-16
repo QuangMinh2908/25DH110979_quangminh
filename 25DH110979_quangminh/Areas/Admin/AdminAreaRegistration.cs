@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Web.Mvc;
 
 namespace _25DH110979_quangminh.Areas.Admin
@@ -19,7 +19,7 @@ namespace _25DH110979_quangminh.Areas.Admin
             context.MapRoute(
                 "Admin_default",
                 "Admin/{controller}/{action}/{id}",
-                new { action = "Index", id = UrlParameter.Optional },
+                new { controller = "Home", action = "Index", id = UrlParameter.Optional },
                 namespaces: new[] { "_25DH110979_quangminh.Areas.Admin.Controllers" }
             );
         }

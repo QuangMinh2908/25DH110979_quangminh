@@ -1,0 +1,27 @@
+@model List<_25DH110979_quangminh.Models.Product>
+
+<div class="row row-cols-2 row-cols-md-4 g-3">
+    @if (Model != null)
+    {
+        foreach (var p in Model)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0 p-2">
+                    <a href="@Url.Action("ProductDetail","Home", new { id = p.ProductID })" class="text-center p-2 bg-white">
+                        <img src="@Url.Content("~/Content/images/" + (string.IsNullOrEmpty(p.ProductImage) ? "default.png" : p.ProductImage))"
+                             style="height:140px; width:100%; object-fit:contain;"
+                             onerror="this.src='/Content/images/default.png'" alt="@p.ProductName" />
+                    </a>
+                    <div class="card-body p-2 d-flex flex-column">
+                        <h6 class="card-title small fw-bold text-truncate mb-1" title="@p.ProductName">
+                            <a href="@Url.Action("ProductDetail","Home", new { id = p.ProductID })" class="text-dark text-decoration-none">@p.ProductName</a>
+                        </h6>
+                        <div class="small text-muted mb-1">Tồn: @p.Quantity</div>
+                        <p class="text-danger fw-bold small mb-2 mt-auto">@p.ProductPrice.ToString("N0") đ</p>
+                        <a href="@Url.Action("ProductDetail","Home", new { id = p.ProductID })" class="btn btn-outline-primary btn-sm w-100">Xem chi tiết</a>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>

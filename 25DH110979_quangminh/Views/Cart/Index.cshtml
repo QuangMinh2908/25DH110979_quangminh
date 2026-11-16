@@ -1,0 +1,142 @@
+@model _25DH110979_quangminh.Models.ViewModel.Cart
+@{
+    ViewBag.Title = "Giỏ hàng";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+}
+
+<h3 class="mb-4 fw-bold"><i class="fas fa-shopping-cart text-warning me-2"></i>Giỏ hàng của bạn</h3>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        @TempData["Success"]
+    </div>
+}
+@if (TempData["Warning"] != null)
+{
+    <div class="alert alert-warning alert-dismissible fade show">
+        @TempData["Warning"]
+    </div>
+}
+
+@if (Model == null || Model.Items.Count == 0)
+{
+    <div class="alert alert-info text-center py-5 shadow-sm">
+        <i class="fas fa-shopping-cart fa-3x mb-3 text-muted"></i>
+        <h5>Giỏ hàng của bạn đang trống!</h5>
+        <p class="text-muted">Hãy lựa chọn những sản phẩm công nghệ tuyệt vời cho bạn.</p>
+        <a href="@Url.Action("Index","Home")" class="btn btn-primary mt-2">
+            <i class="fas fa-shopping-bag me-1"></i> Mua sắm ngay
+        </a>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th>Đơn giá</th>
+                                    <th style="width:160px;">Số lượng</th>
+                                    <th class="text-end">Thành tiền</th>
+                                    <th class="text-center" style="width:60px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in Model.Items)
+                                {
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <img src="@Url.Content("~/Content/images/" + (string.IsNullOrEmpty(item.ProductImage) ? "default.png" : item.ProductImage))"
+                                                     style="width:65px; height:65px; object-fit:contain; border-radius:8px;"
+                                                     class="border p-1 bg-white"
+                                                     onerror="this.src='/Content/images/default.png'" alt="@item.ProductName" />
+                                                <div>
+                                                    <a href="@Url.Action("ProductDetail", "Home", new { id = item.ProductID })" class="fw-bold text-dark text-decoration-none">
+                                                        @item.ProductName
+                                                    </a>
+                                                    <div class="text-muted small">Danh mục: @item.CategoryName</div>
+                                                    <div class="small text-success">Còn lại: @item.Stock sản phẩm</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-danger fw-semibold">@item.UnitPrice.ToString("N0") đ</td>
+                                        <td>
+                                            @using (Html.BeginForm("UpdateQuantity", "Cart", FormMethod.Post, new { @class = "d-flex align-items-center gap-1" }))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="productId" value="@item.ProductID" />
+                                                <div class="input-group input-group-sm">
+                                                    <input type="number" name="quantity" value="@item.Quantity" min="1" max="@item.Stock" class="form-control text-center" />
+                                                    <button type="submit" class="btn btn-outline-primary btn-sm" title="Cập nhật số lượng">
+                                                        <i class="fas fa-check"></i>
+                                                    </button>
+                                                </div>
+                                            }
+                                        </td>
+                                        <td class="text-end fw-bold text-danger">@item.TotalPrice.ToString("N0") đ</td>
+                                        <td class="text-center">
+                                            @using (Html.BeginForm("RemoveFromCart", "Cart", FormMethod.Post))
+                                            {
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="productId" value="@item.ProductID" />
+                                                <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('Xóa sản phẩm này khỏi giỏ hàng?')" title="Xóa">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-3">
+                <a href="@Url.Action("Index","Home")" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Tiếp tục mua hàng
+                </a>
+                @using (Html.BeginForm("ClearCart", "Cart", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Bạn có chắc muốn xóa toàn bộ sản phẩm trong giỏ hàng?')">
+                        <i class="fas fa-trash-can me-1"></i> Làm trống giỏ hàng
+                    </button>
+                }
+            </div>
+        </div>
+
+        <!-- Tổng tiền & Thanh toán -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-warning fw-bold py-3">
+                    <i class="fas fa-receipt me-2"></i>Tóm tắt giỏ hàng
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tổng số sản phẩm:</span>
+                        <strong class="fs-6">@Model.TotalItems</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-3 border-bottom pb-3">
+                        <span>Phí vận chuyển:</span>
+                        <span class="text-success fw-bold">Miễn phí</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-4">
+                        <span class="fs-5 fw-bold">Tổng thanh toán:</span>
+                        <strong class="text-danger fs-4">@Model.TotalAmount.ToString("N0") đ</strong>
+                    </div>
+                    <a href="@Url.Action("Checkout","Order")" class="btn btn-success w-100 btn-lg shadow-sm">
+                        <i class="fas fa-credit-card me-1"></i> Tiến hành thanh toán
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+}

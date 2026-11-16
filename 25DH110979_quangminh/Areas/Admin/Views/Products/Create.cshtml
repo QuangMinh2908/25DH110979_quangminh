@@ -1,0 +1,28 @@
+@model _25DH110979_quangminh.Models.Product
+@{
+    ViewBag.Title = "Thêm sản phẩm mới";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card shadow-sm border-0 my-3">
+    <div class="card-header bg-primary text-white py-3">
+        <h5 class="mb-0 fw-bold"><i class="fa-solid fa-plus-circle me-2"></i>Thêm Mới Sản Phẩm</h5>
+    </div>
+    <div class="card-body p-4">
+        @using (Html.BeginForm("Create", "Products", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.Partial("_PVCUDProduct", Model)
+
+            <hr class="my-4" />
+            <div class="d-flex justify-content-between">
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Quay lại danh sách
+                </a>
+                <button type="submit" class="btn btn-success px-4 fw-bold">
+                    <i class="fa-solid fa-check me-1"></i> Lưu sản phẩm
+                </button>
+            </div>
+        }
+    </div>
+</div>

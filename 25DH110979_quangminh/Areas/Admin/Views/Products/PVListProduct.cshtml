@@ -1,0 +1,79 @@
+@model PagedList.IPagedList<_25DH110979_quangminh.Models.Product>
+
+<div class="table-responsive">
+    <table class="table table-hover table-striped align-middle mb-0">
+        <thead class="table-primary">
+            <tr>
+                <th class="ps-3" style="width: 5%;">Mã</th>
+                <th style="width: 10%;">Hình ảnh</th>
+                <th style="width: 25%;">Tên sản phẩm</th>
+                <th style="width: 15%;">Danh mục</th>
+                <th style="width: 15%;">Đơn giá</th>
+                <th style="width: 10%;" class="text-center">Tồn kho</th>
+                <th style="width: 8%;" class="text-center">Đã bán</th>
+                <th class="text-center" style="width: 12%;">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td class="ps-3 fw-bold text-muted">#@item.ProductID</td>
+                        <td>
+                            <img src="~/Content/images/@(string.IsNullOrEmpty(item.ProductImage) ? "default.png" : item.ProductImage)" 
+                                 class="rounded border" style="width: 60px; height: 50px; object-fit: cover;" 
+                                 onerror="this.src='/Content/images/default.png'" alt="@item.ProductName" />
+                        </td>
+                        <td>
+                            <span class="fw-semibold text-dark">@item.ProductName</span>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark border">@(item.Category != null ? item.Category.CategoryName : "N/A")</span>
+                        </td>
+                        <td class="fw-bold text-danger">@item.ProductPrice.ToString("N0") đ</td>
+                        <td class="text-center">
+                            @if (item.Quantity > 10)
+                            {
+                                <span class="badge bg-success">@item.Quantity</span>
+                            }
+                            else if (item.Quantity > 0)
+                            {
+                                <span class="badge bg-warning text-dark">@item.Quantity (Sắp hết)</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Hết hàng</span>
+                            }
+                        </td>
+                        <td class="text-center fw-semibold text-secondary">
+                            @item.SoldQuantity
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm">
+                                <a href="@Url.Action("Edit", new { id = item.ProductID })" class="btn btn-outline-warning" title="Chỉnh sửa">
+                                    <i class="fa-regular fa-pen-to-square"></i> Sửa
+                                </a>
+                                <a href="@Url.Action("Details", new { id = item.ProductID })" class="btn btn-outline-info" title="Xem chi tiết">
+                                    <i class="fa-regular fa-eye"></i> Xem
+                                </a>
+                                <a href="@Url.Action("Delete", new { id = item.ProductID })" class="btn btn-outline-danger" title="Xóa">
+                                    <i class="fa-regular fa-trash-can"></i> Xóa
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="8" class="text-center py-4 text-muted">
+                        <i class="fa-regular fa-folder-open fa-2x mb-2 d-block"></i> Không tìm thấy sản phẩm nào phù hợp.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

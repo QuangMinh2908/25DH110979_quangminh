@@ -1,0 +1,119 @@
+@model _25DH110979_quangminh.Models.ViewModel.CheckoutVM
+@{
+    ViewBag.Title = "Thanh toán";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+}
+
+<h3 class="mb-4 fw-bold"><i class="fas fa-credit-card text-success"></i> Thanh toán đơn hàng</h3>
+
+<div class="row">
+    <!-- Form đặt hàng -->
+    <div class="col-md-7">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white fw-bold">
+                <i class="fas fa-shipping-fast me-2"></i>Thông tin giao hàng
+            </div>
+            <div class="card-body">
+                @using (Html.BeginForm("Checkout", "Order", FormMethod.Post))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.FullName, "Họ và tên người nhận *", new { @class = "form-label fw-bold" })
+                        @Html.TextBoxFor(m => m.FullName, new { @class = "form-control", placeholder = "Nhập họ tên đầy đủ..." })
+                        @Html.ValidationMessageFor(m => m.FullName, "", new { @class = "text-danger small" })
+                    </div>
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.Phone, "Số điện thoại người nhận *", new { @class = "form-label fw-bold" })
+                        @Html.TextBoxFor(m => m.Phone, new { @class = "form-control", placeholder = "VD: 0912345678" })
+                        @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger small" })
+                    </div>
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.Email, "Email liên hệ", new { @class = "form-label fw-bold" })
+                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email", placeholder = "email@example.com" })
+                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger small" })
+                    </div>
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.ShippingAddress, "Địa chỉ nhận hàng *", new { @class = "form-label fw-bold" })
+                        @Html.TextAreaFor(m => m.ShippingAddress, new { @class = "form-control", rows = 2, placeholder = "Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố..." })
+                        @Html.ValidationMessageFor(m => m.ShippingAddress, "", new { @class = "text-danger small" })
+                    </div>
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.DeliveryMethod, "Phương thức giao hàng", new { @class = "form-label fw-bold" })
+                        @Html.DropDownListFor(m => m.DeliveryMethod, new SelectList(new[]
+                        {
+                            new { Value = "Giao hàng thường", Text = "Giao hàng tiêu chuẩn (3-5 ngày)" },
+                            new { Value = "Giao hàng nhanh", Text = "Giao hàng nhanh (1-2 ngày)" },
+                            new { Value = "Hỏa tốc", Text = "Giao hỏa tốc (trong ngày)" }
+                        }, "Value", "Text"), new { @class = "form-select" })
+                    </div>
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.PaymentMethod, "Phương thức thanh toán", new { @class = "form-label fw-bold" })
+                        @Html.DropDownListFor(m => m.PaymentMethod, new SelectList(new[]
+                        {
+                            new { Value = "Tiền mặt khi nhận hàng", Text = "Tiền mặt khi nhận hàng (COD)" },
+                            new { Value = "Chuyển khoản ngân hàng", Text = "Chuyển khoản ngân hàng (QR Code / Internet Banking)" },
+                            new { Value = "Ví điện tử", Text = "Ví điện tử (MoMo, ZaloPay, VNPay)" }
+                        }, "Value", "Text"), new { @class = "form-select" })
+                    </div>
+                    <div class="mb-3">
+                        @Html.LabelFor(m => m.Notes, "Ghi chú đơn hàng", new { @class = "form-label fw-bold" })
+                        @Html.TextAreaFor(m => m.Notes, new { @class = "form-control", rows = 2, placeholder = "Ghi chú thêm về thời gian giao hàng, chỉ dẫn đường..." })
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-lg w-100">
+                        <i class="fas fa-check-circle me-1"></i> Xác nhận đặt hàng
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Tóm tắt đơn hàng -->
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning fw-bold">
+                <i class="fas fa-shopping-basket me-2"></i>Đơn hàng của bạn
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-sm mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Sản phẩm</th>
+                            <th class="text-center">SL</th>
+                            <th class="text-end">Giá</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Cart != null)
+                        {
+                            foreach (var item in Model.Cart.Items)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="fw-semibold">@item.ProductName</div>
+                                        <small class="text-muted">@item.UnitPrice.ToString("N0") đ/cái</small>
+                                    </td>
+                                    <td class="text-center align-middle">@item.Quantity</td>
+                                    <td class="text-end align-middle text-danger fw-bold">@((item.Quantity * item.UnitPrice).ToString("N0")) đ</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                    <tfoot class="table-warning">
+                        <tr>
+                            <th colspan="2" class="fs-6">Tổng cộng:</th>
+                            <th class="text-end text-danger fs-5">@(Model.Cart?.TotalAmount.ToString("N0")) đ</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div class="card-footer bg-white">
+                <a href="@Url.Action("Index","Cart")" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i> Quay lại giỏ hàng
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

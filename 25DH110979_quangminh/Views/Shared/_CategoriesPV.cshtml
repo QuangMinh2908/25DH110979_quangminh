@@ -1,0 +1,26 @@
+@model IEnumerable<_25DH110979_quangminh.Models.Category>
+
+<div class="category-sidebar">
+    <div class="category-header bg-primary text-white p-3 fw-bold rounded-top">
+        <i class="fa-solid fa-bars me-2"></i> DANH MỤC SẢN PHẨM
+    </div>
+    <ul class="list-group list-group-flush border">
+        <li class="list-group-item">
+            <a href="@Url.Action("ProductList", "Home", new { area = "" })" class="text-decoration-none @(ViewBag.CurrentCategory == null ? "fw-bold text-primary" : "text-dark")">
+                <i class="fa-solid fa-border-all me-2 text-primary"></i> Tất cả sản phẩm
+            </a>
+        </li>
+        @if (Model != null)
+        {
+            foreach (var cat in Model)
+            {
+                <li class="list-group-item">
+                    <a href="@Url.Action("ProductList", "Home", new { area = "", categoryId = cat.CategoryID })" 
+                       class="text-decoration-none @(ViewBag.CurrentCategory != null && (int)ViewBag.CurrentCategory == cat.CategoryID ? "fw-bold text-primary" : "text-dark")">
+                        <i class="fa-solid fa-angle-right me-2 text-muted"></i> @cat.CategoryName
+                    </a>
+                </li>
+            }
+        }
+    </ul>
+</div>

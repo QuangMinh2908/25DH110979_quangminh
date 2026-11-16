@@ -1,0 +1,78 @@
+@model _25DH110979_quangminh.Models.Product
+
+@Html.ValidationSummary(true, "", new { @class = "alert alert-danger mb-3" })
+
+<div class="row g-3">
+    <div class="col-md-8">
+        <div class="mb-3">
+            @Html.LabelFor(model => model.ProductName, "Tên sản phẩm *", new { @class = "form-label fw-bold" })
+            @Html.TextBoxFor(model => model.ProductName, new { @class = "form-control", placeholder = "Nhập tên sản phẩm..." })
+            @Html.ValidationMessageFor(model => model.ProductName, "", new { @class = "text-danger small" })
+        </div>
+
+        <div class="mb-3">
+            @Html.LabelFor(model => model.CategoryID, "Danh mục sản phẩm *", new { @class = "form-label fw-bold" })
+            @Html.DropDownList("CategoryID", null, "-- Chọn danh mục --", new { @class = "form-select" })
+            @Html.ValidationMessageFor(model => model.CategoryID, "", new { @class = "text-danger small" })
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-md-6">
+                @Html.LabelFor(model => model.ProductPrice, "Đơn giá (VNĐ) *", new { @class = "form-label fw-bold" })
+                @Html.TextBoxFor(model => model.ProductPrice, new { @class = "form-control", type = "number", min = "0", step = "1000", placeholder = "VD: 15000000" })
+                @Html.ValidationMessageFor(model => model.ProductPrice, "", new { @class = "text-danger small" })
+            </div>
+            <div class="col-md-6">
+                @Html.LabelFor(model => model.Quantity, "Số lượng tồn kho *", new { @class = "form-label fw-bold" })
+                @Html.TextBoxFor(model => model.Quantity, new { @class = "form-control", type = "number", min = "0", placeholder = "VD: 50" })
+                @Html.ValidationMessageFor(model => model.Quantity, "", new { @class = "text-danger small" })
+            </div>
+        </div>
+
+        @if (Model.ProductID > 0)
+        {
+            <div class="mb-3">
+                @Html.LabelFor(model => model.SoldQuantity, "Số lượng đã bán", new { @class = "form-label fw-bold" })
+                @Html.TextBoxFor(model => model.SoldQuantity, new { @class = "form-control", type = "number", @readonly = "readonly" })
+                <small class="text-muted">Số lượng đã bán tự động tăng khi khách đặt hàng thành công.</small>
+            </div>
+        }
+
+        <div class="mb-3">
+            @Html.LabelFor(model => model.ProductDecription, "Mô tả sản phẩm *", new { @class = "form-label fw-bold" })
+            @Html.TextAreaFor(model => model.ProductDecription, new { @class = "form-control", rows = "5", placeholder = "Nhập thông tin mô tả chi tiết của sản phẩm..." })
+            @Html.ValidationMessageFor(model => model.ProductDecription, "", new { @class = "text-danger small" })
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card p-3 bg-light border shadow-sm">
+            <h6 class="fw-bold mb-3"><i class="fa-solid fa-image me-1"></i>Hình ảnh sản phẩm</h6>
+            
+            <div class="text-center mb-3">
+                <img id="imgPreview" src="~/Content/images/@(string.IsNullOrEmpty(Model.ProductImage) ? "default.png" : Model.ProductImage)" 
+                     class="img-thumbnail shadow-sm" style="max-height: 200px; max-width: 100%; object-fit: contain;" 
+                     onerror="this.src='/Content/images/default.png'" alt="Ảnh sản phẩm" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-bold">Chọn ảnh tải lên:</label>
+                <input type="file" name="UploadImg" id="UploadImg" class="form-control form-control-sm" accept="image/*" onchange="previewFile(this);" />
+                @Html.HiddenFor(model => model.ProductImage)
+            </div>
+            <small class="text-muted">Định dạng hỗ trợ: JPG, PNG, WEBP. Ảnh mặc định sẽ được dùng nếu không tải ảnh.</small>
+        </div>
+    </div>
+</div>
+
+<script>
+    function previewFile(input) {
+        if (input.files && input.files[0]) {
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                document.getElementById('imgPreview').src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>

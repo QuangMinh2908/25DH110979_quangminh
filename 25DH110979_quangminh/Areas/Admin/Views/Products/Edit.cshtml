@@ -1,0 +1,29 @@
+@model _25DH110979_quangminh.Models.Product
+@{
+    ViewBag.Title = "Chỉnh sửa sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card shadow-sm border-0 my-3">
+    <div class="card-header bg-warning text-dark py-3">
+        <h5 class="mb-0 fw-bold"><i class="fa-solid fa-pen-to-square me-2"></i>Chỉnh Sửa Sản Phẩm: @Model.ProductName</h5>
+    </div>
+    <div class="card-body p-4">
+        @using (Html.BeginForm("Edit", "Products", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.HiddenFor(model => model.ProductID)
+            @Html.Partial("_PVCUDProduct", Model)
+
+            <hr class="my-4" />
+            <div class="d-flex justify-content-between">
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Quay lại danh sách
+                </a>
+                <button type="submit" class="btn btn-warning px-4 fw-bold">
+                    <i class="fa-solid fa-floppy-disk me-1"></i> Lưu thay đổi
+                </button>
+            </div>
+        }
+    </div>
+</div>

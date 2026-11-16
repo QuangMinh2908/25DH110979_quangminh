@@ -1,0 +1,59 @@
+@model PagedList.IPagedList<_25DH110979_quangminh.Models.Product>
+@using PagedList.Mvc;
+
+<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+    @if (Model != null && Model.Any())
+    {
+        foreach (var item in Model)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0 position-relative p-2">
+                    <span class="badge bg-primary position-absolute top-0 start-0 m-2"><i class="fa-solid fa-sparkles me-1"></i>Mới</span>
+                    <a href="@Url.Action("ProductDetail", "Home", new { id = item.ProductID })" class="text-center p-2 d-block bg-white">
+                        <img src="~/Content/images/@(string.IsNullOrEmpty(item.ProductImage) ? "default.png" : item.ProductImage)" 
+                             style="height: 180px; width: 100%; object-fit: contain;" 
+                             onerror="this.src='/Content/images/default.png'" alt="@item.ProductName" loading="lazy" />
+                    </a>
+                    <div class="card-body p-2 d-flex flex-column">
+                        <span class="badge bg-light text-secondary border mb-1 align-self-start small">@(item.Category != null ? item.Category.CategoryName : "")</span>
+                        <h6 class="card-title fw-bold text-truncate" title="@item.ProductName">
+                            <a href="@Url.Action("ProductDetail", "Home", new { id = item.ProductID })" class="text-dark text-decoration-none">@item.ProductName</a>
+                        </h6>
+                        <div class="small text-muted mb-2">
+                            <span>Tồn: <strong class="@(item.Quantity > 0 ? "text-success" : "text-danger")">@item.Quantity</strong></span> | 
+                            <span>Đã bán: @item.SoldQuantity</span>
+                        </div>
+                        <div class="text-danger fw-bold fs-6 mb-3 mt-auto">
+                            @item.ProductPrice.ToString("N0") đ
+                        </div>
+                        <div class="d-flex gap-2 mt-auto">
+                            <a href="@Url.Action("ProductDetail", "Home", new { id = item.ProductID })" class="btn btn-outline-primary btn-sm flex-fill">
+                                Chi tiết
+                            </a>
+                            @if (item.Quantity > 0)
+                            {
+                                <a href="@Url.Action("AddToCart", "Cart", new { productId = item.ProductID })" class="btn btn-warning btn-sm px-3 fw-semibold" title="Thêm vào giỏ">
+                                    <i class="fa-solid fa-cart-plus me-1"></i> Mua ngay
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="col-12 py-5 text-center text-muted">
+            <i class="fa-solid fa-box-open fa-3x mb-3 text-secondary"></i>
+            <p>Hiện không có sản phẩm nào phù hợp yêu cầu.</p>
+        </div>
+    }
+</div>
+
+@if (Model != null && Model.PageCount > 1)
+{
+    <div class="d-flex justify-content-center mt-4">
+        @Html.PagedListPager(Model, page => Url.Action("Index", new { page, searchTerm = Request.QueryString["searchTerm"], categoryId = Request.QueryString["categoryId"] }), PagedListRenderOptions.ClassicPlusFirstAndLast)
+    </div>
+}

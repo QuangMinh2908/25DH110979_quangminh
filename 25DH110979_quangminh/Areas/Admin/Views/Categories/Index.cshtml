@@ -1,0 +1,63 @@
+@model IEnumerable<_25DH110979_quangminh.Models.Category>
+@{
+    ViewBag.Title = "Quản lý danh mục";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="admin-header-title mb-0"><i class="fa-solid fa-layer-group text-primary me-2"></i>Danh Sách Danh Mục Sản Phẩm</h3>
+    <a href="@Url.Action("Create")" class="btn btn-primary shadow-sm">
+        <i class="fa-solid fa-plus me-1"></i> Thêm Danh Mục Mới
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped align-middle mb-0">
+                <thead class="table-primary">
+                    <tr>
+                        <th class="ps-3" style="width: 15%;">Mã danh mục</th>
+                        <th>Tên danh mục sản phẩm</th>
+                        <th class="text-center" style="width: 20%;">Số lượng sản phẩm</th>
+                        <th class="text-center" style="width: 25%;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-3 fw-bold text-muted">#@item.CategoryID</td>
+                                <td class="fw-semibold text-dark">@item.CategoryName</td>
+                                <td class="text-center">
+                                    <span class="badge bg-secondary fs-6">@(item.Product != null ? item.Product.Count : 0) sản phẩm</span>
+                                </td>
+                                <td class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <a href="@Url.Action("Edit", new { id = item.CategoryID })" class="btn btn-outline-warning" title="Chỉnh sửa">
+                                            <i class="fa-regular fa-pen-to-square"></i> Sửa
+                                        </a>
+                                        <a href="@Url.Action("Details", new { id = item.CategoryID })" class="btn btn-outline-info" title="Xem chi tiết">
+                                            <i class="fa-regular fa-eye"></i> Chi tiết
+                                        </a>
+                                        <a href="@Url.Action("Delete", new { id = item.CategoryID })" class="btn btn-outline-danger" title="Xóa">
+                                            <i class="fa-regular fa-trash-can"></i> Xóa
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">Chưa có danh mục nào.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

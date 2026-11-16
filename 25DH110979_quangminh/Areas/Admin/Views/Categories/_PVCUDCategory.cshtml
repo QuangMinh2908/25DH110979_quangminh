@@ -1,0 +1,9 @@
+@model _25DH110979_quangminh.Models.Category
+
+@Html.ValidationSummary(true, "", new { @class = "alert alert-danger mb-3" })
+
+<div class="mb-3">
+    @Html.LabelFor(model => model.CategoryName, "Tên danh mục sản phẩm *", new { @class = "form-label fw-bold" })
+    @Html.TextBoxFor(model => model.CategoryName, new { @class = "form-control", placeholder = "Nhập tên danh mục sản phẩm (VD: Điện thoại, Laptop, Phụ kiện...)" })
+    @Html.ValidationMessageFor(model => model.CategoryName, "", new { @class = "text-danger small" })
+</div>

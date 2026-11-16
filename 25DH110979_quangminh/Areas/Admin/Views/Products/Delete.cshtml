@@ -1,0 +1,32 @@
+@model _25DH110979_quangminh.Models.Product
+@{
+    ViewBag.Title = "Xác nhận xóa sản phẩm";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card border-danger shadow-sm my-3 col-lg-10 mx-auto">
+    <div class="card-header bg-danger text-white py-3">
+        <h5 class="mb-0 fw-bold"><i class="fa-solid fa-triangle-exclamation me-2"></i>Xác Nhận Xóa Sản Phẩm</h5>
+    </div>
+    <div class="card-body p-4">
+        <div class="alert alert-warning">
+            <i class="fa-solid fa-circle-exclamation me-2"></i> Bạn có chắc chắn muốn xóa sản phẩm này? Lưu ý: Nếu sản phẩm đã từng được đặt trong đơn hàng, hệ thống sẽ từ chối xóa để đảm bảo toàn vẹn dữ liệu đơn hàng.
+        </div>
+
+        @Html.Partial("PVProductInfo", Model)
+
+        <hr class="my-4" />
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            <div class="d-flex justify-content-between">
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Hủy & Quay lại
+                </a>
+                <button type="submit" class="btn btn-danger px-4 fw-bold">
+                    <i class="fa-solid fa-trash-can me-1"></i> Xác nhận xóa
+                </button>
+            </div>
+        }
+    </div>
+</div>

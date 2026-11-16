@@ -1,0 +1,75 @@
+@{
+    var username = Session["Username"] as string;
+    var customerName = Session["CustomerName"] as string ?? username;
+    var cart = _25DH110979_quangminh.Models.ViewModel.CartService.GetCart(Session);
+    var cartCount = cart != null ? cart.TotalQuantity : 0;
+}
+
+<ul class="navbar-nav ms-auto align-items-center">
+    <!-- Nút giỏ hàng -->
+    <li class="nav-item me-2">
+        <a class="nav-link btn btn-outline-primary position-relative px-3 py-1 text-primary d-flex align-items-center shadow-sm" href="@Url.Action("Index", "Cart", new { area = "" })">
+            <i class="fa-solid fa-cart-shopping me-1 fs-5"></i>
+            <span class="d-none d-md-inline fw-semibold">Giỏ hàng</span>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                @cartCount
+                <span class="visually-hidden">sản phẩm trong giỏ</span>
+            </span>
+        </a>
+    </li>
+
+    @if (!string.IsNullOrEmpty(username))
+    {
+        <!-- Menu khi đã đăng nhập -->
+        <li class="nav-item dropdown ms-2">
+            <a class="nav-link dropdown-toggle d-flex align-items-center text-dark fw-semibold" href="#" role="button" data-bs-toggle="dropdown">
+                <i class="fa-solid fa-circle-user fa-lg text-primary me-2"></i>
+                <span>@customerName</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                <li>
+                    <h6 class="dropdown-header text-muted">Tài khoản: @username</h6>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="@Url.Action("ProfileInfo", "Account", new { area = "" })">
+                        <i class="fa-regular fa-id-badge me-2 text-primary"></i> Thông tin tài khoản
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="@Url.Action("MyOrder", "Order", new { area = "" })">
+                        <i class="fa-solid fa-clock-rotate-left me-2 text-info"></i> Lịch sử đơn hàng
+                    </a>
+                </li>
+                @if (Session["UserRole"] as string == "A")
+                {
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item text-danger fw-bold" href="@Url.Action("Index", "Home", new { area = "Admin" })">
+                            <i class="fa-solid fa-shield-halved me-2"></i> Trang Quản Trị (Admin)
+                        </a>
+                    </li>
+                }
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <a class="dropdown-item text-danger" href="@Url.Action("Logout", "Account", new { area = "" })" onclick="return confirm('Bạn có chắc chắn muốn đăng xuất?');">
+                        <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Đăng xuất
+                    </a>
+                </li>
+            </ul>
+        </li>
+    }
+    else
+    {
+        <!-- Menu khi chưa đăng nhập -->
+        <li class="nav-item ms-2">
+            <a class="nav-link text-dark fw-semibold" href="@Url.Action("Login", "Account", new { area = "" })">
+                <i class="fa-solid fa-right-to-bracket text-primary me-1"></i> Đăng nhập
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link btn btn-primary btn-sm text-white px-3 ms-1 shadow-sm" href="@Url.Action("Register", "Account", new { area = "" })">
+                <i class="fa-solid fa-user-plus me-1"></i> Đăng ký
+            </a>
+        </li>
+    }
+</ul>

@@ -11,6 +11,9 @@ namespace _25DH110979_quangminh.Models
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
+    using System.Web;
     
     public partial class Product
     {
@@ -18,16 +21,52 @@ namespace _25DH110979_quangminh.Models
         public Product()
         {
             this.OrderDetail = new HashSet<OrderDetail>();
+            this.ProductImage = "default.png";
+            this.Quantity = 50;
+            this.SoldQuantity = 0;
         }
     
+        [Display(Name = "Mã sản phẩm")]
         public int ProductID { get; set; }
+
+        [Display(Name = "Mã danh mục")]
+        [Required(ErrorMessage = "Vui lòng chọn danh mục")]
         public int CategoryID { get; set; }
+
+        [Display(Name = "Tên sản phẩm")]
+        [Required(ErrorMessage = "Vui lòng nhập tên sản phẩm")]
+        [StringLength(200, MinimumLength = 2, ErrorMessage = "Tên sản phẩm phải từ 2 đến 200 ký tự")]
         public string ProductName { get; set; }
+
+        [Display(Name = "Mô tả sản phẩm")]
+        [Required(ErrorMessage = "Vui lòng nhập mô tả")]
         public string ProductDecription { get; set; }
+
+        [Display(Name = "Đơn giá")]
+        [Required(ErrorMessage = "Vui lòng nhập đơn giá")]
+        [Range(0, double.MaxValue, ErrorMessage = "Đơn giá phải lớn hơn hoặc bằng 0")]
+        [DisplayFormat(DataFormatString = "{0:N0} đ", ApplyFormatInEditMode = false)]
         public decimal ProductPrice { get; set; }
+
+        [Display(Name = "Hình ảnh")]
         public string ProductImage { get; set; }
+
+        [Display(Name = "Số lượng tồn")]
+        [Required(ErrorMessage = "Vui lòng nhập số lượng tồn")]
+        [Range(0, 1000000, ErrorMessage = "Số lượng tồn phải từ 0 trở lên")]
+        public int Quantity { get; set; }
+
+        [Display(Name = "Số lượng đã bán")]
+        [Range(0, 1000000, ErrorMessage = "Số lượng đã bán phải từ 0 trở lên")]
+        public int SoldQuantity { get; set; }
+
+        [NotMapped]
+        [Display(Name = "Tải ảnh lên")]
+        public HttpPostedFileBase UploadImg { get; set; }
     
+        [Display(Name = "Danh mục")]
         public virtual Category Category { get; set; }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<OrderDetail> OrderDetail { get; set; }
     }

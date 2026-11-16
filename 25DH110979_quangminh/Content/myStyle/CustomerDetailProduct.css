@@ -1,0 +1,136 @@
+/* CustomerDetailProduct.css - Chi tiết sản phẩm */
+.product-detail-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    margin-bottom: 30px;
+}
+
+.product-detail-img-wrap {
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    text-align: center;
+    padding: 20px;
+}
+
+.product-detail-img-wrap img {
+    max-width: 100%;
+    max-height: 420px;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.product-detail-img-wrap:hover img {
+    transform: scale(1.03);
+}
+
+.product-detail-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 12px;
+}
+
+.product-detail-category {
+    font-size: 0.95rem;
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+.product-detail-price {
+    background: #f8f9fa;
+    padding: 16px 20px;
+    border-radius: 8px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #dc3545;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: baseline;
+    gap: 15px;
+}
+
+.product-detail-sold {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-weight: normal;
+}
+
+.product-detail-desc {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #495057;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px dashed #dee2e6;
+}
+
+.quantity-picker {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 25px;
+}
+
+.quantity-picker label {
+    font-weight: 600;
+    color: #495057;
+    margin: 0;
+}
+
+.quantity-input-group {
+    display: flex;
+    align-items: center;
+    width: 130px;
+}
+
+.quantity-input-group .btn {
+    border: 1px solid #ced4da;
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.quantity-input-group input {
+    text-align: center;
+    border-left: 0;
+    border-right: 0;
+    height: 38px;
+}
+
+.subtotal-box {
+    margin-bottom: 25px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #198754;
+}
+
+.detail-actions {
+    display: flex;
+    gap: 15px;
+}
+
+.btn-add-to-cart {
+    padding: 12px 30px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.detail-section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #0d6efd;
+    display: inline-block;
+}

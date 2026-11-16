@@ -1,0 +1,78 @@
+@{
+    ViewBag.Title = "Đăng nhập Admin";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập Quản trị viên - MyStore</title>
+    @Styles.Render("~/Content/css")
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-card {
+            width: 100%;
+            max-width: 420px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="card login-card p-4">
+        <div class="card-body">
+            <div class="text-center mb-4">
+                <i class="fa-solid fa-shield-halved text-primary fa-3x mb-2"></i>
+                <h3 class="fw-bold text-dark">Hệ Thống Quản Trị</h3>
+                <p class="text-muted small">Vui lòng đăng nhập với tài khoản Quản trị viên (Admin)</p>
+            </div>
+
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="alert alert-danger py-2 small" role="alert">
+                    <i class="fa-solid fa-triangle-exclamation me-1"></i> @ViewBag.ErrorMessage
+                </div>
+            }
+
+            @using (Html.BeginForm("Login", "Users", new { area = "Admin", returnUrl = ViewBag.ReturnUrl }, FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Tên đăng nhập:</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-regular fa-user"></i></span>
+                        <input type="text" name="username" class="form-control" placeholder="Tên đăng nhập (VD: admin)" required autofocus />
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Mật khẩu:</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" name="password" class="form-control" placeholder="Mật khẩu" required />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+                    <i class="fa-solid fa-right-to-bracket me-1"></i> Đăng Nhập Quản Trị
+                </button>
+            }
+
+            <div class="text-center mt-4">
+                <a href="@Url.Action("Index", "Home", new { area = "" })" class="text-decoration-none small text-muted">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Trở về website khách hàng
+                </a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

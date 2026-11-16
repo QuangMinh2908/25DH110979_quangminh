@@ -1,0 +1,27 @@
+@model _25DH110979_quangminh.Models.User
+@{
+    ViewBag.Title = "Xác nhận xóa tài khoản Admin";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card border-danger shadow-sm col-lg-6 mx-auto my-4">
+    <div class="card-header bg-danger text-white py-3">
+        <h5 class="mb-0 fw-bold"><i class="fa-solid fa-triangle-exclamation me-2"></i>Xác Nhận Xóa Tài Khoản Quản Trị</h5>
+    </div>
+    <div class="card-body p-4">
+        <div class="alert alert-warning">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i> Bạn có chắc chắn muốn xóa tài khoản Admin <strong>@Model.Username</strong>? Lưu ý tài khoản <code>admin</code> gốc không thể xóa.
+        </div>
+
+        <p class="mb-3">Tên đăng nhập: <strong>@Model.Username</strong></p>
+
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            <div class="d-flex justify-content-between">
+                <a href="@Url.Action("Index")" class="btn btn-outline-secondary"><i class="fa-solid fa-arrow-left me-1"></i> Hủy</a>
+                <button type="submit" class="btn btn-danger px-4"><i class="fa-solid fa-trash-can me-1"></i> Xác nhận xóa</button>
+            </div>
+        }
+    </div>
+</div>

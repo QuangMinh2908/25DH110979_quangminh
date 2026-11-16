@@ -1,0 +1,142 @@
+@model _25DH110979_quangminh.Models.ViewModel.ProductDetailVM
+@{
+    ViewBag.Title = Model.Product.ProductName;
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+    var product = Model.Product;
+    string imgSrc = string.IsNullOrEmpty(product.ProductImage) ? "default.png" : product.ProductImage;
+    bool inStock = product.Quantity > 0;
+    string catName = product.Category != null ? product.Category.CategoryName : "";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="@Url.Action("Index","Home")">Trang chủ</a></li>
+        <li class="breadcrumb-item"><a href="@Url.Action("ProductList","Home", new { categoryId = product.CategoryID })">@catName</a></li>
+        <li class="breadcrumb-item active">@product.ProductName</li>
+    </ol>
+</nav>
+
+<div class="row g-4 mb-5">
+    <!-- Ảnh sản phẩm -->
+    <div class="col-md-5">
+        <div class="card p-3 shadow-sm text-center bg-white">
+            <img src="@Url.Content("~/Content/images/" + imgSrc)"
+                 class="img-fluid rounded" style="max-height:380px; width:100%; object-fit:contain;"
+                 onerror="this.src='/Content/images/default.png'"
+                 alt="@product.ProductName" />
+        </div>
+    </div>
+
+    <!-- Thông tin chi tiết sản phẩm -->
+    <div class="col-md-7">
+        <h2 class="fw-bold mb-2">@product.ProductName</h2>
+        <div class="d-flex gap-3 text-muted small mb-3">
+            <span><i class="fas fa-tag me-1"></i>Danh mục: <strong class="text-dark">@catName</strong></span>
+            <span><i class="fas fa-boxes-stacked me-1"></i>Tồn kho: <strong class="@(inStock ? "text-success" : "text-danger")">@(inStock ? product.Quantity + " sản phẩm" : "Hết hàng")</strong></span>
+            <span><i class="fas fa-fire me-1 text-danger"></i>Đã bán: <strong>@Model.QuantitySold</strong> sản phẩm</span>
+        </div>
+
+        <h3 class="text-danger fw-bold my-3">@product.ProductPrice.ToString("N0") đ</h3>
+        <p class="text-secondary" style="white-space: pre-line; line-height: 1.6;">@product.ProductDecription</p>
+        <hr />
+
+        @if (inStock)
+        {
+            using (Html.BeginForm("AddToCart", "Cart", FormMethod.Post))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="productId" value="@product.ProductID" />
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <label class="fw-semibold">Số lượng mua:</label>
+                    <div class="input-group" style="width:140px;">
+                        <button class="btn btn-outline-secondary" type="button" id="btnMinus">−</button>
+                        <input type="number" name="qty" id="qtyInput" class="form-control text-center" value="1" min="1" max="@product.Quantity" />
+                        <button class="btn btn-outline-secondary" type="button" id="btnPlus">+</button>
+                    </div>
+                    <small class="text-muted">(Tối đa: @product.Quantity)</small>
+                </div>
+                <p>Tạm tính: <strong class="text-danger fs-5" id="subTotal">@product.ProductPrice.ToString("N0") đ</strong></p>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-warning btn-lg px-4 fw-semibold">
+                        <i class="fas fa-shopping-cart me-2"></i>Thêm vào giỏ hàng
+                    </button>
+                    <a href="@Url.Action("Index","Home")" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-arrow-left me-1"></i> Tiếp tục xem
+                    </a>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="alert alert-danger py-3">
+                <i class="fas fa-circle-exclamation me-2"></i>Sản phẩm này hiện đang tạm thời hết hàng trong kho.
+            </div>
+            <a href="@Url.Action("Index","Home")" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Quay lại xem sản phẩm khác
+            </a>
+        }
+    </div>
+</div>
+
+<!-- Sản phẩm liên quan cùng danh mục -->
+@if (Model.RelatedProducts != null && Model.RelatedProducts.Any())
+{
+    <section class="mb-5">
+        <h4 class="fw-bold text-primary border-bottom pb-2 mb-3">
+            <i class="fas fa-link me-2"></i>Sản phẩm cùng danh mục
+        </h4>
+        @Html.Partial("_PVRelatedProduct", Model.RelatedProducts)
+    </section>
+}
+
+<!-- Sản phẩm bán chạy cùng danh mục -->
+@if (Model.TopProducts != null && Model.TopProducts.Any())
+{
+    <section class="mb-5">
+        <h4 class="fw-bold text-danger border-bottom pb-2 mb-3">
+            <i class="fas fa-fire me-2"></i>Top bán chạy cùng danh mục
+        </h4>
+        @Html.Partial("_PVTopProduct", Model.TopProducts)
+    </section>
+}
+
+@section Scripts {
+    <script>
+        var unitPrice = @product.ProductPrice.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        var maxQty = @product.Quantity;
+        var qtyInput = document.getElementById('qtyInput');
+        var subTotal = document.getElementById('subTotal');
+
+        function updateSubTotal() {
+            if (!qtyInput) return;
+            var qty = parseInt(qtyInput.value) || 1;
+            if (qty < 1) qty = 1;
+            if (maxQty > 0 && qty > maxQty) qty = maxQty;
+            qtyInput.value = qty;
+            subTotal.textContent = (qty * unitPrice).toLocaleString('vi-VN') + ' đ';
+        }
+
+        var btnMinus = document.getElementById('btnMinus');
+        var btnPlus = document.getElementById('btnPlus');
+
+        if (btnMinus) {
+            btnMinus.addEventListener('click', function () {
+                if (parseInt(qtyInput.value) > 1) {
+                    qtyInput.value = parseInt(qtyInput.value) - 1;
+                    updateSubTotal();
+                }
+            });
+        }
+        if (btnPlus) {
+            btnPlus.addEventListener('click', function () {
+                if (parseInt(qtyInput.value) < maxQty) {
+                    qtyInput.value = parseInt(qtyInput.value) + 1;
+                    updateSubTotal();
+                }
+            });
+        }
+        if (qtyInput) {
+            qtyInput.addEventListener('input', updateSubTotal);
+        }
+    </script>
+}

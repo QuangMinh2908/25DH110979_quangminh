@@ -1,0 +1,35 @@
+@model _25DH110979_quangminh.Models.Product
+
+<div class="row g-4 align-items-center">
+    <div class="col-md-4 text-center">
+        <div class="p-3 bg-light rounded border shadow-sm">
+            <img src="~/Content/images/@(string.IsNullOrEmpty(Model.ProductImage) ? "default.png" : Model.ProductImage)" 
+                 class="img-fluid rounded" style="max-height: 250px; object-fit: contain;" 
+                 onerror="this.src='/Content/images/default.png'" alt="@Model.ProductName" />
+        </div>
+    </div>
+    <div class="col-md-8">
+        <dl class="row mb-0">
+            <dt class="col-sm-3 text-muted">Mã sản phẩm:</dt>
+            <dd class="col-sm-9 fw-bold">#@Model.ProductID</dd>
+
+            <dt class="col-sm-3 text-muted">Tên sản phẩm:</dt>
+            <dd class="col-sm-9 fw-bold fs-5 text-primary">@Model.ProductName</dd>
+
+            <dt class="col-sm-3 text-muted">Danh mục:</dt>
+            <dd class="col-sm-9"><span class="badge bg-secondary">@(Model.Category != null ? Model.Category.CategoryName : "N/A")</span></dd>
+
+            <dt class="col-sm-3 text-muted">Đơn giá:</dt>
+            <dd class="col-sm-9 fw-bold text-danger fs-5">@Model.ProductPrice.ToString("N0") đ</dd>
+
+            <dt class="col-sm-3 text-muted">Số lượng tồn kho:</dt>
+            <dd class="col-sm-9 fw-bold text-success fs-6">@Model.Quantity cái</dd>
+
+            <dt class="col-sm-3 text-muted">Số lượng đã bán:</dt>
+            <dd class="col-sm-9 fw-semibold text-secondary">@Model.SoldQuantity cái</dd>
+
+            <dt class="col-sm-3 text-muted">Mô tả sản phẩm:</dt>
+            <dd class="col-sm-9 text-secondary" style="white-space: pre-line;">@Model.ProductDecription</dd>
+        </dl>
+    </div>
+</div>

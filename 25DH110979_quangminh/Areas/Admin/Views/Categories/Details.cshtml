@@ -1,0 +1,35 @@
+@model _25DH110979_quangminh.Models.Category
+@{
+    ViewBag.Title = "Chi tiết danh mục";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card shadow-sm col-lg-8 mx-auto my-4">
+    <div class="card-header bg-info text-white py-3">
+        <h5 class="mb-0 fw-bold"><i class="fa-solid fa-circle-info me-2"></i>Chi Tiết Danh Mục: @Model.CategoryName</h5>
+    </div>
+    <div class="card-body p-4">
+        <dl class="row mb-0">
+            <dt class="col-sm-4 text-muted">Mã danh mục:</dt>
+            <dd class="col-sm-8 fw-bold">#@Model.CategoryID</dd>
+
+            <dt class="col-sm-4 text-muted">Tên danh mục:</dt>
+            <dd class="col-sm-8 text-primary fw-semibold fs-5">@Model.CategoryName</dd>
+
+            <dt class="col-sm-4 text-muted">Số lượng sản phẩm thuộc danh mục:</dt>
+            <dd class="col-sm-8"><span class="badge bg-secondary fs-6">@(Model.Product != null ? Model.Product.Count : 0) sản phẩm</span></dd>
+        </dl>
+
+        <hr />
+        <div class="d-flex justify-content-between">
+            <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+                <i class="fa-solid fa-arrow-left me-1"></i> Quay lại danh sách
+            </a>
+            <div>
+                <a href="@Url.Action("Edit", new { id = Model.CategoryID })" class="btn btn-warning">
+                    <i class="fa-regular fa-pen-to-square me-1"></i> Chỉnh sửa
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,105 @@
+@model _25DH110979_quangminh.Models.Customer
+@{
+    ViewBag.Title = "Chi tiết khách hàng";
+    Layout = "~/Areas/Admin/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="card shadow-sm mb-4 border-0">
+    <div class="card-header bg-info text-white py-3">
+        <h5 class="mb-0 fw-bold"><i class="fa-solid fa-id-card me-2"></i>Thông Tin Khách Hàng: @Model.CustomerName</h5>
+    </div>
+    <div class="card-body p-4">
+        <div class="row">
+            <div class="col-md-6">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Mã khách hàng:</dt>
+                    <dd class="col-sm-8 fw-bold">#@Model.CustomerID</dd>
+
+                    <dt class="col-sm-4 text-muted">Họ và tên:</dt>
+                    <dd class="col-sm-8 text-primary fw-semibold fs-5">@Model.CustomerName</dd>
+
+                    <dt class="col-sm-4 text-muted">Tài khoản đăng nhập:</dt>
+                    <dd class="col-sm-8"><code>@Model.Username</code></dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4 text-muted">Số điện thoại:</dt>
+                    <dd class="col-sm-8">@Model.CustomerPhone</dd>
+
+                    <dt class="col-sm-4 text-muted">Email:</dt>
+                    <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.CustomerEmail) ? "Chưa cập nhật" : Model.CustomerEmail)</dd>
+
+                    <dt class="col-sm-4 text-muted">Địa chỉ mặc định:</dt>
+                    <dd class="col-sm-8">@(string.IsNullOrEmpty(Model.CustomerAddress) ? "Chưa cập nhật" : Model.CustomerAddress)</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-light py-3">
+        <h5 class="mb-0 fw-bold text-dark"><i class="fa-solid fa-clock-rotate-left text-primary me-2"></i>Lịch Sử Các Đơn Hàng Của Khách Hàng</h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-primary">
+                    <tr>
+                        <th class="ps-3">Mã đơn</th>
+                        <th>Ngày đặt</th>
+                        <th>Tổng tiền</th>
+                        <th>Phương thức TT</th>
+                        <th>Địa chỉ giao hàng</th>
+                        <th>Trạng thái</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Order != null && Model.Order.Any())
+                    {
+                        foreach (var order in Model.Order.OrderByDescending(o => o.OrderID))
+                        {
+                            <tr>
+                                <td class="ps-3 fw-bold text-primary">#@order.OrderID</td>
+                                <td>@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="fw-bold text-danger">@order.TotalAmount.ToString("N0") đ</td>
+                                <td>@(string.IsNullOrEmpty(order.PaymentMethod) ? "Tiền mặt (COD)" : order.PaymentMethod)</td>
+                                <td>@order.ShippingAddress</td>
+                                <td>
+                                    @{
+                                        string bgClass = "bg-secondary";
+                                        string st = order.PaymentStatus ?? "Chờ xử lý";
+                                        if (st.Contains("Đã giao")) { bgClass = "bg-success"; }
+                                        else if (st.Contains("vận chuyển")) { bgClass = "bg-primary"; }
+                                        else if (st.Contains("xử lý")) { bgClass = "bg-info text-dark"; }
+                                        else if (st.Contains("Chờ")) { bgClass = "bg-warning text-dark"; }
+                                        else if (st.Contains("hủy")) { bgClass = "bg-danger"; }
+                                    }
+                                    <span class="badge @bgClass">@st</span>
+                                </td>
+                                <td class="text-center">
+                                    <a href="@Url.Action("Details", "Orders", new { area = "Admin", id = order.OrderID })" class="btn btn-sm btn-outline-primary">
+                                        <i class="fa-regular fa-eye me-1"></i> Xem đơn
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center py-4 text-muted">Khách hàng này chưa có đơn hàng nào.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer bg-white py-3">
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+            <i class="fa-solid fa-arrow-left me-1"></i> Quay lại danh sách khách hàng
+        </a>
+    </div>
+</div>

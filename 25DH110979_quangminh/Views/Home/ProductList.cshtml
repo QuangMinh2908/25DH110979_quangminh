@@ -1,0 +1,178 @@
+@model _25DH110979_quangminh.Models.ViewModel.ProductSearchVM
+@using PagedList.Mvc
+@{
+    ViewBag.Title = "Danh sách sản phẩm";
+    Layout = "~/Views/Shared/_CustomerLayout.cshtml";
+}
+
+<div class="row g-4">
+    <!-- Sidebar Bộ lọc -->
+    <div class="col-md-3">
+        <div class="card shadow-sm mb-4 border-0">
+            <div class="card-header bg-primary text-white fw-bold py-3">
+                <i class="fas fa-list me-2"></i>Danh mục sản phẩm
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="@Url.Action("ProductList", "Home")" class="list-group-item list-group-item-action @(Model.CategoryID == null ? "active" : "")">
+                    Tất cả sản phẩm
+                </a>
+                @if (ViewBag.Categories != null)
+                {
+                    foreach (var cat in (List<_25DH110979_quangminh.Models.Category>)ViewBag.Categories)
+                    {
+                        <a href="@Url.Action("ProductList", "Home", new { categoryId = cat.CategoryID })"
+                           class="list-group-item list-group-item-action @(Model.CategoryID == cat.CategoryID ? "active" : "")">
+                            @cat.CategoryName
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+
+        <!-- Lọc theo khoảng giá -->
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-warning fw-bold py-3">
+                <i class="fas fa-filter me-2"></i>Lọc theo khoảng giá
+            </div>
+            <div class="card-body">
+                @using (Html.BeginForm("ProductList", "Home", FormMethod.Get))
+                {
+                    @Html.Hidden("categoryId", Model.CategoryID)
+                    @Html.Hidden("searchTerm", Model.SearchTerm)
+                    @Html.Hidden("sortOrder", Model.SortOrder)
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Giá tối thiểu (VNĐ):</label>
+                        <input type="number" name="minPrice" class="form-control form-control-sm" value="@Model.MinPrice" placeholder="Từ 0đ" min="0" step="100000" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Giá tối đa (VNĐ):</label>
+                        <input type="number" name="maxPrice" class="form-control form-control-sm" value="@Model.MaxPrice" placeholder="Đến ...đ" min="0" step="100000" />
+                    </div>
+                    <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold">
+                        <i class="fas fa-check me-1"></i> Áp dụng bộ lọc
+                    </button>
+                    if (Model.MinPrice.HasValue || Model.MaxPrice.HasValue)
+                    {
+                        <a href="@Url.Action("ProductList", "Home", new { categoryId = Model.CategoryID, searchTerm = Model.SearchTerm })" class="btn btn-outline-secondary btn-sm w-100 mt-2">
+                            <i class="fas fa-undo me-1"></i> Bỏ lọc giá
+                        </a>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Danh sách sản phẩm -->
+    <div class="col-md-9">
+        <!-- Thanh tìm kiếm + sắp xếp -->
+        <div class="card shadow-sm mb-4 border-0">
+            <div class="card-body py-3">
+                @using (Html.BeginForm("ProductList", "Home", FormMethod.Get, new { @class = "row g-2 align-items-center" }))
+                {
+                    @Html.Hidden("categoryId", Model.CategoryID)
+                    @Html.Hidden("minPrice", Model.MinPrice)
+                    @Html.Hidden("maxPrice", Model.MaxPrice)
+                    <div class="col-md-6">
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="searchTerm" class="form-control" placeholder="Tìm kiếm sản phẩm theo tên, mô tả..." value="@Model.SearchTerm" />
+                            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <select name="sortOrder" class="form-select form-select-sm" onchange="this.form.submit()">
+                            <option value="">-- Sắp xếp: Mặc định --</option>
+                            <option value="name_asc" @(Model.SortOrder == "name_asc" ? "selected" : "")>Tên (A → Z)</option>
+                            <option value="name_desc" @(Model.SortOrder == "name_desc" ? "selected" : "")>Tên (Z → A)</option>
+                            <option value="price_asc" @(Model.SortOrder == "price_asc" ? "selected" : "")>Giá tăng dần</option>
+                            <option value="price_desc" @(Model.SortOrder == "price_desc" ? "selected" : "")>Giá giảm dần</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <a href="@Url.Action("ProductList", "Home")" class="btn btn-outline-secondary btn-sm" title="Đặt lại tìm kiếm">
+                            <i class="fas fa-rotate-left me-1"></i> Làm mới
+                        </a>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold text-dark mb-0">
+                @ViewBag.CategoryName
+            </h5>
+            <span class="text-muted small">Tìm thấy <strong>@(Model.Products?.TotalItemCount ?? 0)</strong> sản phẩm</span>
+        </div>
+
+        @if (Model.Products != null && Model.Products.Count > 0)
+        {
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                @foreach (var product in Model.Products)
+                {
+                    <div class="col">
+                        <div class="card h-100 shadow-sm border-0 product-card">
+                            <a href="@Url.Action("ProductDetail", "Home", new { id = product.ProductID })" class="text-center p-3 bg-white">
+                                <img src="@Url.Content("~/Content/images/" + (string.IsNullOrEmpty(product.ProductImage) ? "default.png" : product.ProductImage))"
+                                     class="card-img-top" style="height:180px; object-fit:contain;"
+                                     onerror="this.src='/Content/images/default.png'" alt="@product.ProductName" />
+                            </a>
+                            <div class="card-body d-flex flex-column pt-0">
+                                <span class="badge bg-light text-secondary mb-1 align-self-start border">@product.Category?.CategoryName</span>
+                                <h6 class="card-title fw-bold text-truncate" title="@product.ProductName">
+                                    <a href="@Url.Action("ProductDetail", "Home", new { id = product.ProductID })" class="text-dark text-decoration-none">
+                                        @product.ProductName
+                                    </a>
+                                </h6>
+                                <div class="small text-muted mb-2">
+                                    <span>Tồn: <strong class="@(product.Quantity > 0 ? "text-success" : "text-danger")">@product.Quantity</strong></span> | 
+                                    <span>Đã bán: @product.SoldQuantity</span>
+                                </div>
+                                <p class="text-danger fw-bold fs-6 mt-auto mb-3">@product.ProductPrice.ToString("N0") đ</p>
+                                <div class="d-flex gap-2">
+                                    <a href="@Url.Action("ProductDetail", "Home", new { id = product.ProductID })" class="btn btn-outline-primary btn-sm flex-fill">
+                                        Chi tiết
+                                    </a>
+                                    @if (product.Quantity > 0)
+                                    {
+                                        using (Html.BeginForm("AddToCart", "Cart", FormMethod.Post, new { @class = "flex-fill" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="productId" value="@product.ProductID" />
+                                            <input type="hidden" name="qty" value="1" />
+                                            <button type="submit" class="btn btn-warning btn-sm w-100 fw-semibold">
+                                                <i class="fas fa-cart-plus"></i> Thêm
+                                            </button>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <button class="btn btn-secondary btn-sm flex-fill" disabled>Hết hàng</button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            <!-- Phân trang -->
+            <div class="mt-4 d-flex justify-content-center">
+                @Html.PagedListPager(Model.Products, page => Url.Action("ProductList", "Home", new
+                {
+                    page,
+                    searchTerm = Model.SearchTerm,
+                    categoryId = Model.CategoryID,
+                    minPrice = Model.MinPrice,
+                    maxPrice = Model.MaxPrice,
+                    sortOrder = Model.SortOrder
+                }), PagedListRenderOptions.ClassicPlusFirstAndLast)
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-info py-4 text-center">
+                <i class="fas fa-search fa-2x mb-2 text-muted"></i>
+                <p class="mb-0">Không tìm thấy sản phẩm nào phù hợp với điều kiện tìm kiếm.</p>
+            </div>
+        }
+    </div>
+</div>
